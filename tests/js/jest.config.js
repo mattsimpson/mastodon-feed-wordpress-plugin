@@ -20,6 +20,9 @@ module.exports = {
 		'/build/',
 		'/vendor/',
 	],
+	transformIgnorePatterns: [
+		'node_modules/(?!(parsel-js)/)',
+	],
 	moduleNameMapper: {
 		'\\.(css|less|scss|sass)$': '<rootDir>/tests/js/__mocks__/styleMock.js',
 	},
