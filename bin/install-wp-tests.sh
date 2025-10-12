@@ -148,7 +148,7 @@ recreate_db() {
 	# create database
 	RESULT=`mysql -u $DB_USER --password="$DB_PASS" --skip-column-names -e "SHOW DATABASES LIKE '$DB_NAME'"$EXTRA`
 	if [ "$RESULT" == $DB_NAME ]; then
-		mysqladmin -u $DB_USER --password="$DB_PASS"$EXTRA drop $DB_NAME
+		mysqladmin --force -u $DB_USER --password="$DB_PASS"$EXTRA drop $DB_NAME
 	fi
 	mysqladmin -u $DB_USER --password="$DB_PASS"$EXTRA create $DB_NAME
 }
