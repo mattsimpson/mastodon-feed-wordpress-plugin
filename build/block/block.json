@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "mastodon-feed/embed",
+  "title": "Mastodon Feed",
+  "category": "embed",
+  "icon": "rss",
+  "description": "Embed a Mastodon feed from any instance",
+  "keywords": ["mastodon", "feed", "social", "fediverse"],
+  "version": "1.0.0",
+  "textdomain": "mastodon-feed",
+  "attributes": {
+    "instance": {
+      "type": "string",
+      "default": "mastodon.social"
+    },
+    "account": {
+      "type": "string",
+      "default": ""
+    },
+    "tag": {
+      "type": "string",
+      "default": ""
+    },
+    "limit": {
+      "type": "number",
+      "default": 10
+    },
+    "excludeBoosts": {
+      "type": "boolean",
+      "default": false
+    },
+    "excludeReplies": {
+      "type": "boolean",
+      "default": false
+    },
+    "onlyPinned": {
+      "type": "boolean",
+      "default": false
+    },
+    "onlyMedia": {
+      "type": "boolean",
+      "default": false
+    },
+    "showPreviewCards": {
+      "type": "boolean"
+    },
+    "showPostAuthor": {
+      "type": "boolean"
+    },
+    "showDateTime": {
+      "type": "boolean"
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": true,
+    "alignWide": true
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./editor.css",
+  "style": "file:./style.css"
+}

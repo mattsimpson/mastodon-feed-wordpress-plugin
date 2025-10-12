@@ -11,8 +11,9 @@ Plugin that provides both a Gutenberg Block and `[mastodon-feed]` shortcode to e
 * [Installation](#installation)
   * [Installation via ZIP file](#installation-via-zip-file)
   * [Installation via git checkout](#installation-via-git-checkout)
+* [Development](#development)
 * [FAQ](#faq)
-  * [How do I find my account ID?](#how-do-i-find-my-account-id)
+  * [How do I find my Mastodon account ID?](#how-do-i-find-my-account-id)
   * [Can I customize the appearance?](#can-i-customize-the-appearance)
   * [Can I modify the plugin?](#can-i-modify-the-plugin)
 
@@ -149,9 +150,9 @@ The plugin is available through the official WordPress plugin directory https://
 1. Click on the `<>Code` in the top right of this page
 2. Select `Download ZIP`
 3. Create a `mastodon-feed` folder in your WordPress plugins directory
-4. Unpack all the files from the ZIP there (files only, no sub-directory)
+4. Unpack all the files from the ZIP there
 5. Enable plugin in WordPress admin
-6. Configure settings and use the shortcode
+6. Configure settings and use the block editor or shortcode
 
 ### Installation via git checkout
 
@@ -161,7 +162,21 @@ If you are familiar with GitHub you can clone the repository right into your Wor
 2. `cd /path/to/wordpress/wp-content/plugins`
 3. `git clone https://github.com/mattsimpson/mastodon-feed-wordpress-plugin.git mastodon-feed`
 4. Enable plugin in WordPress admin
-5. Configure settings and use the shortcode
+5. Configure settings and use the block editor or shortcode
+
+**Note:** The compiled block files are included in the repository, so no build step is required.
+
+## Development
+
+If you want to modify the block editor component:
+
+1. Make changes to files in `/src/block/`
+2. Run `npm install` (first time only)
+3. Run `npm run build` to compile and test your changes locally
+4. When ready to commit changes, commit only changes to the `src/` directory. Not the `build/` directory.
+5. Create a pull request to mastodon-feed main branch
+
+**Important:** Developers should not commit their own build files. This will be done by the project maintainer at release.
 
 ## FAQ
 
