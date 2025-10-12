@@ -1,0 +1,16 @@
+/**
+ * Frontend and editor styles for the Mastodon Feed block
+ */
+
+.wp-block-mastodon-feed-embed {
+	margin: 1rem 0;
+}
+
+/* Ensure block respects alignment */
+.wp-block-mastodon-feed-embed.alignwide {
+	max-width: var(--wp--style--global--wide-size, 1280px);
+}
+
+.wp-block-mastodon-feed-embed.alignfull {
+	max-width: none;
+}

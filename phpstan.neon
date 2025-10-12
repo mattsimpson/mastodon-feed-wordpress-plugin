@@ -1,0 +1,25 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 6
+    inferPrivatePropertyTypeFromConstructor: true
+
+    paths:
+        - mastodon-feed.php
+
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
+
+    excludePaths:
+        - tests/*
+        - vendor/*
+        - node_modules/*
+        - build/*
+        - src/*
+
+    ignoreErrors:
+        # WordPress core functions are dynamically loaded
+        - '#Function (add_action|add_filter|add_shortcode|register_block_type|get_option|update_option|delete_option|wp_remote_get|wp_kses_post|esc_html|esc_attr|esc_url) not found#'
+        # Allow WP_Error to be used as return type
+        - '#Return type .* has no value type specified in iterable type array#'

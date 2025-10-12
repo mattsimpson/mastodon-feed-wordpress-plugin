@@ -1,0 +1,47 @@
+{
+  "name": "mastodon-feed-block",
+  "version": "1.0.0",
+  "description": "Mastodon Feed Gutenberg Block",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "wp-scripts build src/block/index.js --output-path=build/block && npm run copy-block-json",
+    "copy-block-json": "cp src/block/block.json build/block/block.json",
+    "start": "wp-scripts start src/block/index.js --output-path=build/block",
+    "format": "wp-scripts format",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js",
+    "packages-update": "wp-scripts packages-update",
+    "test": "wp-scripts test-unit-js --config=tests/js/jest.config.js",
+    "test:watch": "wp-scripts test-unit-js --config=tests/js/jest.config.js --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "wp-env": "wp-env",
+    "wp-env:start": "wp-env start",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:destroy": "wp-env destroy"
+  },
+  "keywords": [
+    "mastodon",
+    "gutenberg",
+    "block"
+  ],
+  "author": "Matt Simpson",
+  "license": "MIT",
+  "devDependencies": {
+    "@wordpress/scripts": "^27.0.0",
+    "@wordpress/env": "^9.0.0",
+    "@wordpress/e2e-test-utils-playwright": "^0.19.0",
+    "@playwright/test": "^1.41.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^6.0.0",
+    "@wordpress/block-editor": "^12.0.0",
+    "@wordpress/blocks": "^12.0.0",
+    "@wordpress/components": "^25.0.0",
+    "@wordpress/element": "^5.0.0",
+    "@wordpress/i18n": "^4.0.0",
+    "@wordpress/server-side-render": "^4.0.0"
+  }
+}

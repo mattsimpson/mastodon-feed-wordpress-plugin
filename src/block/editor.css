@@ -1,0 +1,44 @@
+/**
+ * Editor-specific styles for the Mastodon Feed block
+ */
+
+.mastodon-feed-block-editor {
+	min-height: 200px;
+}
+
+.mastodon-feed-placeholder-content {
+	width: 100%;
+	max-width: 400px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.mastodon-feed-placeholder-content .components-base-control {
+	margin-bottom: 0;
+}
+
+.mastodon-feed-placeholder-divider {
+	text-align: center;
+	margin: 8px 0;
+	color: #757575;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.mastodon-feed-placeholder-content .components-button {
+	justify-content: center;
+}
+
+.mastodon-feed-placeholder-content .components-notice {
+	margin: 8px 0;
+}
+
+/* Inspector Controls Styling */
+.components-panel__body .components-notice {
+	margin-bottom: 12px;
+}
+
+.components-panel__body .components-base-control + .components-button {
+	width: 100%;
+}
