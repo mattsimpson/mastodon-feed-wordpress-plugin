@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="tests/bootstrap-unit.php"
+    backupGlobals="false"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    verbose="true"
+>
+    <testsuites>
+        <testsuite name="unit">
+            <directory suffix=".php">tests/php/unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./</directory>
+        </include>
+        <exclude>
+            <directory>./tests</directory>
+            <directory>./vendor</directory>
+            <directory>./node_modules</directory>
+            <directory>./build</directory>
+            <directory>./src</directory>
+            <directory>./templates</directory>
+            <file>./uninstall.php</file>
+        </exclude>
+    </coverage>
+</phpunit>

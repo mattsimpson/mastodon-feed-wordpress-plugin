@@ -7,18 +7,15 @@
 
 namespace IncludeMastodonFeedPlugin\Tests\Unit;
 
-use Brain\Monkey;
 use Brain\Monkey\Functions;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Test CSS generation functions
  */
-class Test_CSS_Generation extends TestCase {
+class Test_CSS_Generation extends UnitTestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		Monkey\setUp();
 
 		if (!defined('MASTODON_FEED_STYLE_BG_COLOR')) {
 			define('MASTODON_FEED_STYLE_BG_COLOR', 'rgba(219,219,219,0.8)');
@@ -37,21 +34,14 @@ class Test_CSS_Generation extends TestCase {
 		}
 	}
 
-	protected function tearDown(): void {
-		Monkey\tearDown();
-		parent::tearDown();
-	}
-
 	/**
 	 * Test CSS generation includes custom properties
 	 */
 	public function test_css_includes_custom_properties() {
-		Functions\expect('get_option')->andReturnUsing(function($key, $default) {
+		Functions\when('get_option')->alias(function($key, $default) {
 			return $default;
 		});
-		Functions\expect('esc_attr')->andReturnFirstArg();
-
-		require_once __DIR__ . '/../../../mastodon-feed.php';
+		Functions\when('esc_attr')->returnArg();
 
 		$css = \IncludeMastodonFeedPlugin\get_mastodon_feed_css();
 
@@ -65,12 +55,10 @@ class Test_CSS_Generation extends TestCase {
 	 * Test CSS includes layout styles
 	 */
 	public function test_css_includes_layout_styles() {
-		Functions\expect('get_option')->andReturnUsing(function($key, $default) {
+		Functions\when('get_option')->alias(function($key, $default) {
 			return $default;
 		});
-		Functions\expect('esc_attr')->andReturnFirstArg();
-
-		require_once __DIR__ . '/../../../mastodon-feed.php';
+		Functions\when('esc_attr')->returnArg();
 
 		$css = \IncludeMastodonFeedPlugin\get_mastodon_feed_css();
 
@@ -85,12 +73,10 @@ class Test_CSS_Generation extends TestCase {
 	 * Test CSS uses var() for theme values
 	 */
 	public function test_css_uses_css_variables() {
-		Functions\expect('get_option')->andReturnUsing(function($key, $default) {
+		Functions\when('get_option')->alias(function($key, $default) {
 			return $default;
 		});
-		Functions\expect('esc_attr')->andReturnFirstArg();
-
-		require_once __DIR__ . '/../../../mastodon-feed.php';
+		Functions\when('esc_attr')->returnArg();
 
 		$css = \IncludeMastodonFeedPlugin\get_mastodon_feed_css();
 

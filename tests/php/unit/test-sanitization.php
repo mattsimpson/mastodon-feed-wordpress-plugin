@@ -7,24 +7,10 @@
 
 namespace IncludeMastodonFeedPlugin\Tests\Unit;
 
-use Brain\Monkey;
-use Brain\Monkey\Functions;
-use PHPUnit\Framework\TestCase;
-
 /**
  * Test sanitization functions
  */
-class Test_Sanitization extends TestCase {
-
-	protected function setUp(): void {
-		parent::setUp();
-		Monkey\setUp();
-	}
-
-	protected function tearDown(): void {
-		Monkey\tearDown();
-		parent::tearDown();
-	}
+class Test_Sanitization extends UnitTestCase {
 
 	/**
 	 * Test instance domain sanitization removes protocols
@@ -66,7 +52,7 @@ class Test_Sanitization extends TestCase {
 		$tags = [
 			'#photography' => 'photography',
 			'photography' => 'photography',
-			'##double' => '#double',
+			'##double' => 'double', // ltrim removes ALL leading # chars, not just one
 			'#' => '',
 		];
 

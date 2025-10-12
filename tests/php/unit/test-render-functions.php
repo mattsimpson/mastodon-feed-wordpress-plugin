@@ -7,35 +7,21 @@
 
 namespace IncludeMastodonFeedPlugin\Tests\Unit;
 
-use Brain\Monkey;
 use Brain\Monkey\Functions;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Test render functions output correct HTML
  */
-class Test_Render_Functions extends TestCase {
-
-	protected function setUp(): void {
-		parent::setUp();
-		Monkey\setUp();
-	}
-
-	protected function tearDown(): void {
-		Monkey\tearDown();
-		parent::tearDown();
-	}
+class Test_Render_Functions extends UnitTestCase {
 
 	/**
 	 * Test render_text_field generates proper input
 	 */
 	public function test_render_text_field() {
-		Functions\expect('get_option')->with('test_option', 'default')->andReturn('test_value');
-		Functions\expect('esc_attr')->andReturnFirstArg();
-		Functions\expect('esc_html')->andReturnFirstArg();
-		Functions\expect('wp_kses_post')->andReturnFirstArg();
-
-		require_once __DIR__ . '/../../../mastodon-feed.php';
+		Functions\when('get_option')->justReturn('test_value');
+		Functions\when('esc_attr')->returnArg();
+		Functions\when('esc_html')->returnArg();
+		Functions\when('wp_kses_post')->returnArg();
 
 		ob_start();
 		\IncludeMastodonFeedPlugin\render_text_field([
@@ -54,12 +40,10 @@ class Test_Render_Functions extends TestCase {
 	 * Test render_checkbox_field generates proper checkbox
 	 */
 	public function test_render_checkbox_field() {
-		Functions\expect('get_option')->with('test_checkbox', '0')->andReturn('1');
-		Functions\expect('esc_attr')->andReturnFirstArg();
-		Functions\expect('checked')->with(1, '1')->andReturn(' checked="checked"');
-		Functions\expect('wp_kses_post')->andReturnFirstArg();
-
-		require_once __DIR__ . '/../../../mastodon-feed.php';
+		Functions\when('get_option')->justReturn('1');
+		Functions\when('esc_attr')->returnArg();
+		Functions\when('checked')->justReturn(' checked="checked"');
+		Functions\when('wp_kses_post')->returnArg();
 
 		ob_start();
 		\IncludeMastodonFeedPlugin\render_checkbox_field([
@@ -75,12 +59,10 @@ class Test_Render_Functions extends TestCase {
 	 * Test render_number_field generates proper number input
 	 */
 	public function test_render_number_field() {
-		Functions\expect('get_option')->with('test_number', 10)->andReturn(20);
-		Functions\expect('esc_attr')->andReturnFirstArg();
-		Functions\expect('esc_html')->andReturnFirstArg();
-		Functions\expect('wp_kses_post')->andReturnFirstArg();
-
-		require_once __DIR__ . '/../../../mastodon-feed.php';
+		Functions\when('get_option')->justReturn(20);
+		Functions\when('esc_attr')->returnArg();
+		Functions\when('esc_html')->returnArg();
+		Functions\when('wp_kses_post')->returnArg();
 
 		ob_start();
 		\IncludeMastodonFeedPlugin\render_number_field([

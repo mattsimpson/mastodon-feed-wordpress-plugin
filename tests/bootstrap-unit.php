@@ -8,6 +8,54 @@ if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
 	require dirname(__DIR__) . '/vendor/autoload.php';
 }
 
+// Define WP_Error class for tests
+if (!class_exists('WP_Error')) {
+	class WP_Error {
+		private $errors = [];
+		private $error_data = [];
+
+		public function __construct($code = '', $message = '', $data = '') {
+			if (empty($code)) {
+				return;
+			}
+			$this->errors[$code][] = $message;
+			if (!empty($data)) {
+				$this->error_data[$code] = $data;
+			}
+		}
+
+		public function get_error_code() {
+			$codes = array_keys($this->errors);
+			return $codes[0] ?? '';
+		}
+
+		public function get_error_message($code = '') {
+			if (empty($code)) {
+				$code = $this->get_error_code();
+			}
+			return $this->errors[$code][0] ?? '';
+		}
+
+		public function get_error_messages($code = '') {
+			if (empty($code)) {
+				return array_reduce($this->errors, 'array_merge', []);
+			}
+			return $this->errors[$code] ?? [];
+		}
+
+		public function get_error_data($code = '') {
+			if (empty($code)) {
+				$code = $this->get_error_code();
+			}
+			return $this->error_data[$code] ?? '';
+		}
+
+		public function has_errors() {
+			return !empty($this->errors);
+		}
+	}
+}
+
 // Define WordPress constants that the plugin needs
 if (!defined('HOUR_IN_SECONDS')) {
 	define('HOUR_IN_SECONDS', 3600);
