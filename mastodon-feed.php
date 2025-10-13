@@ -130,25 +130,101 @@ unset( $constants );
 // Track if shortcode or block is used on the page.
 $mastodon_feed_shortcode_used = false;
 
+// Cache for widget detection result (null = not checked yet).
+$mastodon_feed_widgets_checked = null;
+
+/**
+ * Check if the shortcode or block is present in any active widgets.
+ *
+ * Scans all active sidebars and widgets for the mastodon-feed shortcode or block.
+ * Results are cached globally to avoid rescanning on the same page load.
+ *
+ * @return bool True if shortcode/block found in widgets, false otherwise.
+ */
+function check_widgets_for_feed() {
+	global $mastodon_feed_widgets_checked;
+
+	// Return cached result if already checked.
+	if ( null !== $mastodon_feed_widgets_checked ) {
+		return $mastodon_feed_widgets_checked;
+	}
+
+	// Default to false.
+	$mastodon_feed_widgets_checked = false;
+
+	$sidebars_widgets = wp_get_sidebars_widgets();
+	if ( ! is_array( $sidebars_widgets ) ) {
+		return false;
+	}
+
+	$widget_types = array( 'text', 'custom_html', 'block' );
+
+	foreach ( $sidebars_widgets as $sidebar => $widgets ) {
+		if ( 'wp_inactive_widgets' === $sidebar || ! is_array( $widgets ) ) {
+			continue;
+		}
+
+		foreach ( $widgets as $widget ) {
+			foreach ( $widget_types as $type ) {
+				if ( strpos( $widget, $type . '-' ) === 0 ) {
+					$widget_id      = str_replace( $type . '-', '', $widget );
+					$widget_options = get_option( 'widget_' . $type );
+
+					if ( is_array( $widget_options ) && isset( $widget_options[ $widget_id ] ) ) {
+						$widget_data = $widget_options[ $widget_id ];
+
+						$content_fields = array( 'text', 'content', 'title' );
+						foreach ( $content_fields as $field ) {
+							if ( isset( $widget_data[ $field ] ) && is_string( $widget_data[ $field ] ) ) {
+								// Check for shortcode.
+								if ( has_shortcode( $widget_data[ $field ], 'mastodon-feed' ) ) {
+									$mastodon_feed_widgets_checked = true;
+									return true;
+								}
+								// Check for Gutenberg block (used in block widgets).
+								if ( has_block( 'mastodon-feed/embed', $widget_data[ $field ] ) ) {
+									$mastodon_feed_widgets_checked = true;
+									return true;
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
 /**
  * Check if the shortcode or block is used on the current page.
  *
  * Sets global $mastodon_feed_shortcode_used flag for conditional CSS/JS loading.
+ * Checks post content and Gutenberg blocks. Widget checking is deferred to
+ * init_styles() and enqueue_frontend_scripts() as widgets may not be available yet.
  */
 function check_for_shortcode() {
 	global $post, $mastodon_feed_shortcode_used;
 
+	// Check post content and blocks.
 	if ( is_a( $post, 'WP_Post' ) ) {
 		// Check for shortcode.
 		if ( has_shortcode( $post->post_content, 'mastodon-feed' ) ) {
 			$mastodon_feed_shortcode_used = true;
+			return;
 		}
 
 		// Check for Gutenberg block.
 		if ( has_block( 'mastodon-feed/embed', $post ) ) {
 			$mastodon_feed_shortcode_used = true;
+			return;
 		}
 	}
+
+	// Note: Widget checking is deferred to init_styles() and enqueue_frontend_scripts()
+	// as widgets may not be fully available at this hook timing.
 }
 
 add_action( 'wp', __NAMESPACE__ . '\check_for_shortcode' );
@@ -170,7 +246,7 @@ function get_mastodon_feed_css() {
 	}
 
 	.mastodon-feed .mastodon-feed-post {
-	margin: 0.75rem;
+	margin: 0.75rem 0;
 	border-radius: var(--mastodon-feed-border-radius);
 	padding: 1rem;
 	background: var(--mastodon-feed-bg);
@@ -181,13 +257,16 @@ function get_mastodon_feed_css() {
 	color: var(--mastodon-feed-accent-color);
 	text-decoration: none;
 	word-wrap: break-word;
+	transition: color 0.2s ease, text-decoration 0.2s ease;
 	}
 
-	.mastodon-feed .mastodon-feed-post a:hover {
+	.mastodon-feed .mastodon-feed-post a:hover,
+	.mastodon-feed .mastodon-feed-post a:focus-visible {
 	text-decoration: underline;
 	}
 
-	.mastodon-feed .avatar {
+	.mastodon-feed img.avatar {
+	display: inline-block;
 	height: 1.5rem;
 	border-radius: var(--mastodon-feed-border-radius);
 	vertical-align: top;
@@ -196,6 +275,10 @@ function get_mastodon_feed_css() {
 
 	.mastodon-feed .account {
 	font-size: 1.0rem;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.25rem;
 	}
 
 	.mastodon-feed .account a {
@@ -203,7 +286,7 @@ function get_mastodon_feed_css() {
 	}
 
 	.mastodon-feed .account .booster {
-	float: right;
+	margin-left: auto;
 	font-style: italic;
 	}
 
@@ -213,11 +296,13 @@ function get_mastodon_feed_css() {
 	padding: 0.3rem 0.3rem 0.2rem 0.3rem;
 	background: var(--mastodon-feed-accent-color);
 	color: var(--mastodon-feed-accent-font-color);
+	transition: background 0.2s ease, color 0.2s ease;
 	}
 
 	.mastodon-feed .boosted .account > a:first-child:hover,
-	.mastodon-feed .content-warning a:hover {
-	border-radius: var(--mastodon-feed-border-radius);
+	.mastodon-feed .boosted .account > a:first-child:focus-visible,
+	.mastodon-feed .content-warning a:hover,
+	.mastodon-feed .content-warning a:focus-visible {
 	background: var(--mastodon-feed-accent-font-color);
 	color: var(--mastodon-feed-accent-color);
 	text-decoration: none;
@@ -275,12 +360,29 @@ function get_mastodon_feed_css() {
 	.mastodon-feed .media > .image a {
 	border-radius: var(--mastodon-feed-border-radius);
 	display: block;
-	aspect-ratio: 1.618;
+	position: relative;
 	background-size: cover;
 	background-position: center;
+	transition: filter 0.3s ease;
 	}
 
-	.mastodon-feed .media > .image a:hover {
+	.mastodon-feed .media > .image a::before {
+	content: '';
+	display: block;
+	padding-top: 61.8%;
+	}
+
+	@supports (aspect-ratio: 1.618) {
+		.mastodon-feed .media > .image a {
+			aspect-ratio: 1.618;
+		}
+		.mastodon-feed .media > .image a::before {
+			display: none;
+		}
+	}
+
+	.mastodon-feed .media > .image a:hover,
+	.mastodon-feed .media > .image a:focus-visible {
 	filter: contrast(110%) brightness(130%) saturate(130%);
 	}
 
@@ -300,8 +402,14 @@ function get_mastodon_feed_css() {
 	.mastodon-feed .card iframe {
 	border-radius: var(--mastodon-feed-border-radius);
 	width: 100%;
-	height: 100%;
-	aspect-ratio: 2 / 1.25;
+	min-height: 200px;
+	}
+
+	@supports (aspect-ratio: 2 / 1.25) {
+		.mastodon-feed .card iframe {
+			aspect-ratio: 2 / 1.25;
+			height: 100%;
+		}
 	}
 
 	.mastodon-feed .card a {
@@ -309,9 +417,11 @@ function get_mastodon_feed_css() {
 	display: block;
 	text-decoration: none;
 	color: inherit;
+	transition: background 0.2s ease, color 0.2s ease;
 	}
 
-	.mastodon-feed .card a:hover {
+	.mastodon-feed .card a:hover,
+	.mastodon-feed .card a:focus-visible {
 	text-decoration: none;
 	background: var(--mastodon-feed-accent-color);
 	color: var(--mastodon-feed-accent-font-color);
@@ -342,9 +452,16 @@ function get_mastodon_feed_css() {
  * Initialize and output CSS styles for Mastodon feed in page head.
  *
  * Only outputs styles if the shortcode or block is detected on the current page.
+ * Performs a final check for widgets if not already detected, since widgets may
+ * not be available during the earlier 'wp' hook.
  */
 function init_styles() {
 	global $mastodon_feed_shortcode_used;
+
+	// If not already detected, check widgets (cached to avoid duplicate scans).
+	if ( ! $mastodon_feed_shortcode_used && check_widgets_for_feed() ) {
+		$mastodon_feed_shortcode_used = true;
+	}
 
 	// Only output CSS if shortcode is present.
 	if ( ! $mastodon_feed_shortcode_used ) {
@@ -360,9 +477,16 @@ add_action( 'wp_head', __NAMESPACE__ . '\init_styles', 7 );
  * Enqueue frontend JavaScript for Mastodon feed functionality.
  *
  * Only loads scripts if the shortcode or block is detected on the current page.
+ * Performs a final check for widgets if not already detected, since widgets may
+ * not be available during the earlier 'wp' hook.
  */
 function enqueue_frontend_scripts() {
 	global $mastodon_feed_shortcode_used;
+
+	// If not already detected, check widgets (cached to avoid duplicate scans).
+	if ( ! $mastodon_feed_shortcode_used && check_widgets_for_feed() ) {
+		$mastodon_feed_shortcode_used = true;
+	}
 
 	// Only enqueue if shortcode is present.
 	if ( ! $mastodon_feed_shortcode_used ) {
