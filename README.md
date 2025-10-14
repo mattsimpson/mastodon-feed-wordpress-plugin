@@ -213,3 +213,12 @@ You can also override default values by defining constants in your `wp-config.ph
 
 ### Can I modify the plugin?
 The plugin is released under the [Expat License](LICENSE) (MIT) which is very permissive. Knock yourself out!
+
+## Credits and Acknowledgements
+
+This plugin was inspired by and builds upon the work of others in the WordPress and Mastodon communities:
+
+* **[WolfGang](https://mastodon.social/@w101)** - For the original [Include Mastodon Feed WordPress Plugin](https://wolfgang.lol/code/include-mastodon-feed-wordpress-plugin) which served as inspiration and provided valuable insights for this implementation
+* **[Automattic](https://automattic.com/)** - For the [WordPress ActivityPub Plugin](https://github.com/Automattic/wordpress-activitypub) which provided inspiration for integrating federated social networks with WordPress
+
+Thank you to these projects and their contributors for helping make the WordPress ecosystem more connected to the Fediverse!

@@ -127,3 +127,12 @@ Yes, as long as the instance has public API access enabled.
 
 = 1.0.0 =
 Initial release of Mastodon Feed plugin.
+
+== Credits ==
+
+This plugin was inspired by and builds upon the work of others in the WordPress and Mastodon communities:
+
+* WolfGang (https://mastodon.social/@w101) - For the original Include Mastodon Feed WordPress Plugin (https://wolfgang.lol/code/include-mastodon-feed-wordpress-plugin) which served as inspiration for this implementation
+* Automattic - For the WordPress ActivityPub Plugin (https://github.com/Automattic/wordpress-activitypub) which provided inspiration for integrating federated social networks with WordPress
+
+Thank you to these projects and their contributors for helping make the WordPress ecosystem more connected to the Fediverse!
