@@ -248,7 +248,7 @@ function get_mastodon_feed_css() {
 	.mastodon-feed .mastodon-feed-post {
 	margin: 0.75rem 0;
 	border-radius: var(--mastodon-feed-border-radius);
-	padding: 1rem;
+	padding: 0.75rem;
 	background: var(--mastodon-feed-bg);
 	color: var(--mastodon-feed-font-color);
 	}
@@ -270,14 +270,11 @@ function get_mastodon_feed_css() {
 	height: 1.5rem;
 	border-radius: var(--mastodon-feed-border-radius);
 	vertical-align: top;
-	margin-right: 0.1rem;
 	}
 
 	.mastodon-feed .account {
-	font-size: 1.0rem;
-	display: flex;
 	align-items: center;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 	gap: 0.25rem;
 	}
 
@@ -310,7 +307,7 @@ function get_mastodon_feed_css() {
 
 	.mastodon-feed .content-wrapper.boosted {
 	margin: 0.5rem 0;
-	padding: 0.5rem;
+	padding: 0.35rem;
 	background: var(--mastodon-feed-bg);
 	border-radius: var(--mastodon-feed-border-radius);
 	}
@@ -1871,10 +1868,6 @@ function display_feed( $atts ) {
 			?>
 			<div class="mastodon-feed-post">
 				<div class="account">
-					<?php if ( $is_reblog ) : ?>
-						<span class="booster"><?php echo esc_html( $atts['text-boosted'] ); ?></span>
-					<?php endif; ?>
-
 					<?php if ( ! empty( $atts['showpostauthor'] ) ) : ?>
 						<img class="avatar" src="<?php echo esc_url( $status['account']['avatar_static'] ); ?>"
 							alt="<?php echo esc_attr( $status['account']['display_name'] ); ?>">
@@ -1896,6 +1889,10 @@ function display_feed( $atts ) {
 						<?php if ( ! empty( $status['edited_at'] ) ) : ?>
 							<span class="edited"><?php echo esc_html( $atts['text-edited'] ); ?></span>
 						<?php endif; ?>
+					<?php endif; ?>
+
+					<?php if ( $is_reblog ) : ?>
+						<span class="booster"><?php echo esc_html( $atts['text-boosted'] ); ?></span>
 					<?php endif; ?>
 				</div>
 
