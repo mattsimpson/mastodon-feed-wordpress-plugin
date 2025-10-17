@@ -1,10 +1,11 @@
 {
-  "name": "mastodon-feed-block",
+  "name": "mastodon-feed",
   "version": "1.0.0",
-  "description": "Mastodon Feed Gutenberg Block",
+  "description": "Display Mastodon feeds in WordPress via Gutenberg blocks and embeds",
   "main": "build/index.js",
   "scripts": {
     "build": "wp-scripts build src/block/index.js --output-path=build/block && npm run copy-block-json",
+    "build:dist": "npm run build && node scripts/build-dist.js",
     "copy-block-json": "cp src/block/block.json build/block/block.json",
     "start": "wp-scripts start src/block/index.js --output-path=build/block",
     "format": "wp-scripts format",
@@ -22,8 +23,11 @@
   },
   "keywords": [
     "mastodon",
+    "wordpress",
     "gutenberg",
-    "block"
+    "block",
+    "feed",
+    "social-media"
   ],
   "author": "Matt Simpson",
   "license": "MIT",

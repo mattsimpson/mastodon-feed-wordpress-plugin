@@ -2,6 +2,7 @@
 /.git
 /.github
 /.idea
+/.vscode
 /node_modules
 /src
 /.gitignore
@@ -21,10 +22,13 @@
 /playwright.config.js
 /tests
 /bin
+/scripts
+/dist
 /.editorconfig
 /.eslintrc
 /.eslintrc.js
 /.eslintignore
+/.eslintcache
 /webpack.config.js
 /tsconfig.json
 /.browserslistrc

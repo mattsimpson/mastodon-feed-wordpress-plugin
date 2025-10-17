@@ -33,3 +33,9 @@ coverage/
 
 # ESLint cache
 .eslintcache
+
+# Build output
+dist/
+
+# WordPress environment
+.wp-env.override.json
