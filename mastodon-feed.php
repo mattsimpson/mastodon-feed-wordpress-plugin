@@ -119,9 +119,10 @@ $constants = array(
 		'value' => 5,
 	),
 );
-// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound,WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- Loop variable for defining constants.
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Loop variable for defining constants.
 foreach ( $constants as $constant ) {
 	if ( ! defined( $constant['key'] ) ) {
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- Dynamic constant definition from array.
 		define( $constant['key'], $constant['value'] );
 	}
 }
@@ -2082,10 +2083,10 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_mastodon_feed_rest_api' 
 /**
  * REST API handler for account lookup (thin wrapper around shared function).
  *
- * @param WP_REST_Request $request The REST API request object.
- * @return WP_REST_Response|WP_Error Response object on success, or WP_Error on failure.
+ * @param \WP_REST_Request $request The REST API request object.
+ * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error on failure.
  */
-function lookup_mastodon_account( $request ) {
+function lookup_mastodon_account( \WP_REST_Request $request ) {
 	$handle = $request->get_param( 'handle' );
 
 	// Call the shared lookup function.

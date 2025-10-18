@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+build/
+dist/
+
+# Minified files
+*.min.js
+
+# Third-party libraries
+assets/js/wp-color-picker-alpha.min.js

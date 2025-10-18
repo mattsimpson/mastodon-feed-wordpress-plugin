@@ -1,8 +1,5 @@
-import { __ } from '@wordpress/i18n';
-import {
-	InspectorControls,
-	useBlockProps
-} from '@wordpress/block-editor';
+import { __, sprintf } from '@wordpress/i18n';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	TextControl,
@@ -11,14 +8,14 @@ import {
 	Button,
 	Spinner,
 	Notice,
-	Placeholder
+	Placeholder,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import ServerSideRender from '@wordpress/server-side-render';
 import './editor.css';
 
-export default function Edit({ attributes, setAttributes }) {
+export default function Edit( { attributes, setAttributes } ) {
 	const {
 		instance,
 		account,
@@ -30,151 +27,194 @@ export default function Edit({ attributes, setAttributes }) {
 		onlyMedia,
 		showPreviewCards,
 		showPostAuthor,
-		showDateTime
+		showDateTime,
 	} = attributes;
 
 	// Get defaults from localized settings (passed from PHP)
 	const defaults = window.mastodonFeedDefaults || {};
 
 	// Helper to get attribute value with fallback to admin default
-	const getAttributeValue = (attrValue, defaultValue) => {
+	const getAttributeValue = ( attrValue, defaultValue ) => {
 		return attrValue !== undefined ? attrValue : defaultValue;
 	};
 
-	const [lookupHandle, setLookupHandle] = useState('');
-	const [isLookingUp, setIsLookingUp] = useState(false);
-	const [lookupError, setLookupError] = useState('');
-	const [lookupSuccess, setLookupSuccess] = useState('');
+	const [ lookupHandle, setLookupHandle ] = useState( '' );
+	const [ isLookingUp, setIsLookingUp ] = useState( false );
+	const [ lookupError, setLookupError ] = useState( '' );
+	const [ lookupSuccess, setLookupSuccess ] = useState( '' );
 
 	// Local state for placeholder inputs (prevents premature closing)
-	const [placeholderAccount, setPlaceholderAccount] = useState('');
-	const [placeholderTag, setPlaceholderTag] = useState('');
-	const [placeholderInstance, setPlaceholderInstance] = useState(instance || 'mastodon.social');
+	const [ placeholderAccount, setPlaceholderAccount ] = useState( '' );
+	const [ placeholderTag, setPlaceholderTag ] = useState( '' );
+	const [ placeholderInstance, setPlaceholderInstance ] = useState(
+		instance || 'mastodon.social'
+	);
 
-	const blockProps = useBlockProps({
-		className: 'mastodon-feed-block-editor'
-	});
+	const blockProps = useBlockProps( {
+		className: 'mastodon-feed-block-editor',
+	} );
 
 	// Function to lookup account ID from handle using WordPress REST API
 	const lookupAccountId = async () => {
-		if (!lookupHandle) {
-			setLookupError(__('Please enter a Mastodon handle (e.g., username@mastodon.social)', 'mastodon-feed'));
+		if ( ! lookupHandle ) {
+			setLookupError(
+				__(
+					'Please enter a Mastodon handle (e.g., username@mastodon.social)',
+					'mastodon-feed'
+				)
+			);
 			return;
 		}
 
-		setIsLookingUp(true);
-		setLookupError('');
-		setLookupSuccess('');
+		setIsLookingUp( true );
+		setLookupError( '' );
+		setLookupSuccess( '' );
 
 		try {
 			// Use WordPress REST API endpoint (server-side lookup to avoid CORS and authentication issues)
-			const response = await apiFetch({
+			const response = await apiFetch( {
 				path: '/mastodon-feed/v1/lookup-account',
 				method: 'POST',
 				data: {
-					handle: lookupHandle.trim()
-				}
-			});
+					handle: lookupHandle.trim(),
+				},
+			} );
 
-			if (response.success && response.account) {
-				setAttributes({
+			if ( response.success && response.account ) {
+				setAttributes( {
 					account: response.account.id,
-					instance: response.instance
-				});
-				setLookupSuccess(__(`Found account: @${response.account.acct} (ID: ${response.account.id})`, 'mastodon-feed'));
-				setLookupHandle('');
+					instance: response.instance,
+				} );
+				setLookupSuccess(
+					sprintf(
+						/* translators: %1$s: account handle, %2$s: account ID */
+						__(
+							'Found account: @%1$s (ID: %2$s)',
+							'mastodon-feed'
+						),
+						response.account.acct,
+						response.account.id
+					)
+				);
+				setLookupHandle( '' );
 			} else {
-				throw new Error(__('No account found with that handle.', 'mastodon-feed'));
+				throw new Error(
+					__( 'No account found with that handle.', 'mastodon-feed' )
+				);
 			}
-		} catch (error) {
+		} catch ( error ) {
 			// Extract error message from WordPress REST API error response
-			const errorMessage = error.message || __('Failed to lookup account. Please verify the handle and try again.', 'mastodon-feed');
-			setLookupError(errorMessage);
+			const errorMessage =
+				error.message ||
+				__(
+					'Failed to lookup account. Please verify the handle and try again.',
+					'mastodon-feed'
+				);
+			setLookupError( errorMessage );
 		} finally {
-			setIsLookingUp(false);
+			setIsLookingUp( false );
 		}
 	};
 
 	// Finalize the placeholder setup and switch to main view
 	const finalizePlaceholderSetup = () => {
-		if (placeholderAccount || placeholderTag) {
-			setAttributes({
+		if ( placeholderAccount || placeholderTag ) {
+			setAttributes( {
 				account: placeholderAccount || '',
 				tag: placeholderTag || '',
-				instance: placeholderInstance
-			});
+				instance: placeholderInstance,
+			} );
 		}
 	};
 
 	// Show placeholder if no account or tag is set
-	if (!account && !tag) {
+	if ( ! account && ! tag ) {
 		return (
-			<div {...blockProps}>
+			<div { ...blockProps }>
 				<Placeholder
 					icon="rss"
-					label={__('Mastodon Feed', 'mastodon-feed')}
-					instructions={__('Enter your Mastodon account ID or use the lookup tool to find it.', 'mastodon-feed')}
+					label={ __( 'Mastodon Feed', 'mastodon-feed' ) }
+					instructions={ __(
+						'Enter your Mastodon account ID or use the lookup tool to find it.',
+						'mastodon-feed'
+					) }
 				>
 					<div className="mastodon-feed-placeholder-content">
 						<TextControl
-							label={__('Mastodon Handle', 'mastodon-feed')}
-							value={lookupHandle}
-							onChange={setLookupHandle}
+							label={ __( 'Mastodon Handle', 'mastodon-feed' ) }
+							value={ lookupHandle }
+							onChange={ setLookupHandle }
 							placeholder="username@instance.domain"
-							help={__('Enter your full Mastodon handle (e.g., username@mastodon.social)', 'mastodon-feed')}
+							help={ __(
+								'Enter your full Mastodon handle (e.g., username@mastodon.social)',
+								'mastodon-feed'
+							) }
 						/>
 						<Button
 							variant="primary"
-							onClick={lookupAccountId}
-							disabled={isLookingUp}
+							onClick={ lookupAccountId }
+							disabled={ isLookingUp }
 						>
-							{isLookingUp ? <Spinner /> : __('Lookup Account ID', 'mastodon-feed')}
+							{ isLookingUp ? (
+								<Spinner />
+							) : (
+								__( 'Lookup Account ID', 'mastodon-feed' )
+							) }
 						</Button>
 
-						{lookupError && (
-							<Notice status="error" isDismissible={false}>
-								{lookupError}
+						{ lookupError && (
+							<Notice status="error" isDismissible={ false }>
+								{ lookupError }
 							</Notice>
-						)}
+						) }
 
-						{lookupSuccess && (
-							<Notice status="success" isDismissible={false}>
-								{lookupSuccess}
+						{ lookupSuccess && (
+							<Notice status="success" isDismissible={ false }>
+								{ lookupSuccess }
 							</Notice>
-						)}
+						) }
 
 						<div className="mastodon-feed-placeholder-divider">
-							{__('or', 'mastodon-feed')}
+							{ __( 'or', 'mastodon-feed' ) }
 						</div>
 
 						<TextControl
-							label={__('Instance', 'mastodon-feed')}
-							value={placeholderInstance}
-							onChange={setPlaceholderInstance}
+							label={ __( 'Instance', 'mastodon-feed' ) }
+							value={ placeholderInstance }
+							onChange={ setPlaceholderInstance }
 							placeholder="mastodon.social"
-							help={__('Mastodon instance domain (without https://)', 'mastodon-feed')}
+							help={ __(
+								'Mastodon instance domain (without https://)',
+								'mastodon-feed'
+							) }
 						/>
 
 						<TextControl
-							label={__('Account ID', 'mastodon-feed')}
-							value={placeholderAccount}
-							onChange={setPlaceholderAccount}
-							onBlur={finalizePlaceholderSetup}
+							label={ __( 'Account ID', 'mastodon-feed' ) }
+							value={ placeholderAccount }
+							onChange={ setPlaceholderAccount }
+							onBlur={ finalizePlaceholderSetup }
 							placeholder="109321514573003627"
-							help={__('Your Mastodon account ID (a long number)', 'mastodon-feed')}
+							help={ __(
+								'Your Mastodon account ID (a long number)',
+								'mastodon-feed'
+							) }
 						/>
 
 						<div className="mastodon-feed-placeholder-divider">
-							{__('or', 'mastodon-feed')}
+							{ __( 'or', 'mastodon-feed' ) }
 						</div>
 
 						<TextControl
-							label={__('Tag', 'mastodon-feed')}
-							value={placeholderTag}
-							onChange={setPlaceholderTag}
-							onBlur={finalizePlaceholderSetup}
+							label={ __( 'Tag', 'mastodon-feed' ) }
+							value={ placeholderTag }
+							onChange={ setPlaceholderTag }
+							onBlur={ finalizePlaceholderSetup }
 							placeholder="photography"
-							help={__('Show tag feed instead of account feed (without # symbol)', 'mastodon-feed')}
+							help={ __(
+								'Show tag feed instead of account feed (without # symbol)',
+								'mastodon-feed'
+							) }
 						/>
 					</div>
 				</Placeholder>
@@ -186,118 +226,197 @@ export default function Edit({ attributes, setAttributes }) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={__('Account Lookup', 'mastodon-feed')} initialOpen={true}>
+				<PanelBody
+					title={ __( 'Account Lookup', 'mastodon-feed' ) }
+					initialOpen={ true }
+				>
 					<TextControl
-						label={__('Mastodon Handle', 'mastodon-feed')}
-						value={lookupHandle}
-						onChange={setLookupHandle}
+						label={ __( 'Mastodon Handle', 'mastodon-feed' ) }
+						value={ lookupHandle }
+						onChange={ setLookupHandle }
 						placeholder="username@instance.domain"
-						help={__('Lookup account ID from handle', 'mastodon-feed')}
+						help={ __(
+							'Lookup account ID from handle',
+							'mastodon-feed'
+						) }
 					/>
 					<Button
 						variant="secondary"
-						onClick={lookupAccountId}
-						disabled={isLookingUp}
-						style={{ marginBottom: '12px' }}
+						onClick={ lookupAccountId }
+						disabled={ isLookingUp }
+						style={ { marginBottom: '12px' } }
 					>
-						{isLookingUp ? <Spinner /> : __('Lookup Account ID', 'mastodon-feed')}
+						{ isLookingUp ? (
+							<Spinner />
+						) : (
+							__( 'Lookup Account ID', 'mastodon-feed' )
+						) }
 					</Button>
 
-					{lookupError && (
-						<Notice status="error" isDismissible={true} onRemove={() => setLookupError('')}>
-							{lookupError}
+					{ lookupError && (
+						<Notice
+							status="error"
+							isDismissible={ true }
+							onRemove={ () => setLookupError( '' ) }
+						>
+							{ lookupError }
 						</Notice>
-					)}
+					) }
 
-					{lookupSuccess && (
-						<Notice status="success" isDismissible={true} onRemove={() => setLookupSuccess('')}>
-							{lookupSuccess}
+					{ lookupSuccess && (
+						<Notice
+							status="success"
+							isDismissible={ true }
+							onRemove={ () => setLookupSuccess( '' ) }
+						>
+							{ lookupSuccess }
 						</Notice>
-					)}
+					) }
 				</PanelBody>
 
-				<PanelBody title={__('Feed Settings', 'mastodon-feed')} initialOpen={true}>
+				<PanelBody
+					title={ __( 'Feed Settings', 'mastodon-feed' ) }
+					initialOpen={ true }
+				>
 					<TextControl
-						label={__('Instance', 'mastodon-feed')}
-						value={instance}
-						onChange={(value) => setAttributes({ instance: value })}
-						help={__('Mastodon instance domain', 'mastodon-feed')}
+						label={ __( 'Instance', 'mastodon-feed' ) }
+						value={ instance }
+						onChange={ ( value ) =>
+							setAttributes( { instance: value } )
+						}
+						help={ __(
+							'Mastodon instance domain',
+							'mastodon-feed'
+						) }
 					/>
 
 					<TextControl
-						label={__('Account ID', 'mastodon-feed')}
-						value={account}
-						onChange={(value) => setAttributes({ account: value })}
-						help={__('Your Mastodon account ID', 'mastodon-feed')}
+						label={ __( 'Account ID', 'mastodon-feed' ) }
+						value={ account }
+						onChange={ ( value ) =>
+							setAttributes( { account: value } )
+						}
+						help={ __(
+							'Your Mastodon account ID',
+							'mastodon-feed'
+						) }
 					/>
 
 					<TextControl
-						label={__('Tag', 'mastodon-feed')}
-						value={tag}
-						onChange={(value) => setAttributes({ tag: value })}
-						help={__('Show tag feed instead (without #)', 'mastodon-feed')}
+						label={ __( 'Tag', 'mastodon-feed' ) }
+						value={ tag }
+						onChange={ ( value ) =>
+							setAttributes( { tag: value } )
+						}
+						help={ __(
+							'Show tag feed instead (without #)',
+							'mastodon-feed'
+						) }
 					/>
 
 					<RangeControl
-						label={__('Number of Posts', 'mastodon-feed')}
-						value={limit}
-						onChange={(value) => setAttributes({ limit: value })}
-						min={1}
-						max={40}
+						label={ __( 'Number of Posts', 'mastodon-feed' ) }
+						value={ limit }
+						onChange={ ( value ) =>
+							setAttributes( { limit: value } )
+						}
+						min={ 1 }
+						max={ 40 }
 					/>
 				</PanelBody>
 
-				<PanelBody title={__('Filter Options', 'mastodon-feed')} initialOpen={false}>
-                    <ToggleControl
-                        label={__('Only Pinned Posts', 'mastodon-feed')}
-                        checked={getAttributeValue(onlyPinned, defaults.onlyPinned)}
-                        onChange={(value) => setAttributes({ onlyPinned: value })}
-                    />
-
-                    <ToggleControl
-                        label={__('Only Media Posts', 'mastodon-feed')}
-                        checked={getAttributeValue(onlyMedia, defaults.onlyMedia)}
-                        onChange={(value) => setAttributes({ onlyMedia: value })}
-                    />
-
+				<PanelBody
+					title={ __( 'Filter Options', 'mastodon-feed' ) }
+					initialOpen={ false }
+				>
 					<ToggleControl
-						label={__('Exclude Boosts', 'mastodon-feed')}
-						checked={getAttributeValue(excludeBoosts, defaults.excludeBoosts)}
-						onChange={(value) => setAttributes({ excludeBoosts: value })}
+						label={ __( 'Only Pinned Posts', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							onlyPinned,
+							defaults.onlyPinned
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { onlyPinned: value } )
+						}
 					/>
 
 					<ToggleControl
-						label={__('Exclude Replies', 'mastodon-feed')}
-						checked={getAttributeValue(excludeReplies, defaults.excludeReplies)}
-						onChange={(value) => setAttributes({ excludeReplies: value })}
+						label={ __( 'Only Media Posts', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							onlyMedia,
+							defaults.onlyMedia
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { onlyMedia: value } )
+						}
+					/>
+
+					<ToggleControl
+						label={ __( 'Exclude Boosts', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							excludeBoosts,
+							defaults.excludeBoosts
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { excludeBoosts: value } )
+						}
+					/>
+
+					<ToggleControl
+						label={ __( 'Exclude Replies', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							excludeReplies,
+							defaults.excludeReplies
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { excludeReplies: value } )
+						}
 					/>
 				</PanelBody>
 
-				<PanelBody title={__('Display Options', 'mastodon-feed')} initialOpen={false}>
+				<PanelBody
+					title={ __( 'Display Options', 'mastodon-feed' ) }
+					initialOpen={ false }
+				>
 					<ToggleControl
-						label={__('Show Preview Cards', 'mastodon-feed')}
-						checked={getAttributeValue(showPreviewCards, defaults.showPreviewCards)}
-						onChange={(value) => setAttributes({ showPreviewCards: value })}
+						label={ __( 'Show Preview Cards', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							showPreviewCards,
+							defaults.showPreviewCards
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { showPreviewCards: value } )
+						}
 					/>
 
 					<ToggleControl
-						label={__('Show Post Author', 'mastodon-feed')}
-						checked={getAttributeValue(showPostAuthor, defaults.showPostAuthor)}
-						onChange={(value) => setAttributes({ showPostAuthor: value })}
+						label={ __( 'Show Post Author', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							showPostAuthor,
+							defaults.showPostAuthor
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { showPostAuthor: value } )
+						}
 					/>
 
 					<ToggleControl
-						label={__('Show Date & Time', 'mastodon-feed')}
-						checked={getAttributeValue(showDateTime, defaults.showDateTime)}
-						onChange={(value) => setAttributes({ showDateTime: value })}
+						label={ __( 'Show Date & Time', 'mastodon-feed' ) }
+						checked={ getAttributeValue(
+							showDateTime,
+							defaults.showDateTime
+						) }
+						onChange={ ( value ) =>
+							setAttributes( { showDateTime: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
 
-			<div {...blockProps}>
+			<div { ...blockProps }>
 				<ServerSideRender
 					block="mastodon-feed/embed"
-					attributes={attributes}
+					attributes={ attributes }
 				/>
 			</div>
 		</>
