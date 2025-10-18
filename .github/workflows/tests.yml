@@ -134,9 +134,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start WordPress environment
-        run: npm run wp-env:start
-
       - name: Run E2E tests
         run: npm run test:e2e
 
