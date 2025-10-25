@@ -34,10 +34,13 @@ module.exports = defineConfig( {
 		},
 	],
 
-	webServer: {
-		command: 'npm run wp-env start',
-		url: 'http://localhost:8888/wp-admin',
-		reuseExistingServer: ! process.env.CI,
-		timeout: 120000,
-	},
+	// Only configure webServer if wp-env isn't already started (e.g., by CI workflow)
+	webServer: process.env.WPENV_STARTED
+		? undefined
+		: {
+				command: 'npm run wp-env start',
+				url: 'http://localhost:8888/wp-admin',
+				reuseExistingServer: ! process.env.CI,
+				timeout: 120000,
+		  },
 } );

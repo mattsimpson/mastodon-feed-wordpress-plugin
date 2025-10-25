@@ -137,8 +137,16 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Start wp-env
+        run: npx wp-env start
+
+      - name: Activate plugin
+        run: npx wp-env run cli wp plugin activate mastodon-feed
+
       - name: Run E2E tests
         run: npm run test:e2e
+        env:
+          WPENV_STARTED: true
 
       - name: Upload test results
         if: failure()
