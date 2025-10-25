@@ -19,7 +19,10 @@ This document explains how to run the comprehensive test suite for the Mastodon 
    composer install
    ```
 
-2. **Install WordPress test suite:**
+2. **Install WordPress test suite (ONLY needed for integration tests):**
+
+   > **Important:** You only need this if you want to run integration tests (`composer test:integration`, `composer test`, or `composer test:all`). PHP unit tests work without this setup.
+
    ```bash
    bash bin/install-wp-tests.sh wordpress_test root 'your-password' 127.0.0.1 latest
    ```
@@ -30,6 +33,10 @@ This document explains how to run the comprehensive test suite for the Mastodon 
    - `'your-password'` - MySQL password (use quotes!)
    - `127.0.0.1` - MySQL host
    - `latest` - WordPress version (or specific like `6.4`)
+
+   **Requirements:**
+   - MySQL or MariaDB must be installed and running
+   - Database credentials with permission to create databases
 
 ### JavaScript Tests Setup
 
@@ -45,13 +52,35 @@ This document explains how to run the comprehensive test suite for the Mastodon 
 
 ## Running Tests
 
-### All Tests
+### Quick Test Commands
 
-Run the complete test suite:
+**PHP Unit Tests (No Setup Required):**
 ```bash
-composer test:all  # PHP tests + code quality
-npm test           # JavaScript tests
+composer test:unit   # Run PHP unit tests with mocked WordPress functions
 ```
+
+**JavaScript Tests:**
+```bash
+npm test             # Run JavaScript unit tests (Jest)
+```
+
+**PHP Integration Tests (Requires WordPress Test Suite):**
+```bash
+composer test:integration  # Run PHP integration tests (requires setup - see below)
+```
+
+**All PHP Tests:**
+```bash
+composer test        # Run unit + integration tests (requires setup)
+composer test:all    # Run all PHP tests + code quality checks (requires setup)
+```
+
+**E2E Tests:**
+```bash
+npm run test:e2e     # Run end-to-end tests (requires wp-env running)
+```
+
+> **Note:** For quick local development, `composer test:unit` and `npm test` work without any setup. Integration tests require installing the WordPress test suite first (see [PHP Tests Setup](#php-tests-setup)).
 
 ### PHP Unit Tests
 
@@ -277,6 +306,16 @@ Access:
 ## Troubleshooting
 
 ### PHPUnit Issues
+
+**Problem:** `Could not find .../wordpress-tests-lib/includes/functions.php`
+```bash
+# This error occurs when running integration tests without setup
+# Solution 1: Run unit tests only (no setup required)
+composer test:unit
+
+# Solution 2: Install WordPress test suite for integration tests
+bash bin/install-wp-tests.sh wordpress_test root 'your-password' 127.0.0.1 latest
+```
 
 **Problem:** `WP_TESTS_DIR` not found
 ```bash

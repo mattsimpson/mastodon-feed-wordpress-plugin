@@ -2013,7 +2013,7 @@ function register_mastodon_feed_block() {
 		return;
 	}
 
-	// Register the block.
+	// Register the block type from block.json with render callback.
 	register_block_type(
 		__DIR__ . '/build/block',
 		array(

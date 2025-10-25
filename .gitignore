@@ -20,8 +20,9 @@ yarn-error.log*
 vendor/
 composer.lock
 
-# Playwright authentication
+# Playwright authentication and artifacts
 .auth/
+artifacts/
 test-results/
 playwright-report/
 

@@ -5,6 +5,11 @@ const path = require( 'path' );
 process.env.WP_BASE_URL = process.env.WP_BASE_URL || 'http://localhost:8888';
 process.env.WP_USERNAME = process.env.WP_USERNAME || 'admin';
 process.env.WP_PASSWORD = process.env.WP_PASSWORD || 'password';
+process.env.WP_ARTIFACTS_PATH =
+	process.env.WP_ARTIFACTS_PATH || path.join( __dirname, 'artifacts' );
+process.env.STORAGE_STATE_PATH =
+	process.env.STORAGE_STATE_PATH ||
+	path.join( process.env.WP_ARTIFACTS_PATH, 'storage-states/admin.json' );
 
 module.exports = defineConfig( {
 	testDir: './tests/e2e',
@@ -17,7 +22,7 @@ module.exports = defineConfig( {
 
 	use: {
 		baseURL: process.env.WP_BASE_URL,
-		storageState: path.join( __dirname, '.auth/storageState.json' ),
+		storageState: process.env.STORAGE_STATE_PATH,
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure',
 	},

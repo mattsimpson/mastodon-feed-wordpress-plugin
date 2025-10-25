@@ -3,53 +3,39 @@
  * Handles WordPress authentication before running tests
  */
 
-const { chromium } = require( '@playwright/test' );
-const path = require( 'path' );
-const fs = require( 'fs' );
+const { request } = require( '@playwright/test' );
+const { RequestUtils } = require( '@wordpress/e2e-test-utils-playwright' );
 
-async function globalSetup() {
-	const baseURL = process.env.WP_BASE_URL || 'http://localhost:8888';
-	const username = process.env.WP_USERNAME || 'admin';
-	const password = process.env.WP_PASSWORD || 'password';
-	const storageStatePath = path.join(
-		__dirname,
-		'../../.auth/storageState.json'
-	);
+/**
+ * Authenticate with WordPress and save storage state
+ *
+ * @param {import('@playwright/test').FullConfig} config - Playwright configuration
+ * @return {Promise<void>}
+ */
+async function globalSetup( config ) {
+	const { storageState, baseURL } = config.projects[ 0 ].use;
+	const storageStatePath =
+		typeof storageState === 'string' ? storageState : undefined;
 
-	console.log( 'Setting up WordPress authentication...' );
+	console.log( 'Setting up WordPress authentication via REST API...' );
 
-	// Launch browser
-	const browser = await chromium.launch();
-	const page = await browser.newPage();
+	const requestContext = await request.newContext( {
+		baseURL,
+	} );
 
-	try {
-		// Navigate to login page
-		await page.goto( `${ baseURL }/wp-login.php` );
+	const requestUtils = new RequestUtils( requestContext, {
+		storageStatePath,
+	} );
 
-		// Fill in login form
-		await page.fill( '#user_login', username );
-		await page.fill( '#user_pass', password );
-		await page.click( '#wp-submit' );
+	// Authenticate and save the storageState to disk.
+	await requestUtils.setupRest();
 
-		// Wait for navigation to complete
-		await page.waitForURL( /wp-admin/, { timeout: 10000 } );
+	// Note: Plugin is automatically activated by wp-env when using "plugins": ["."]
+	// No manual activation needed
 
-		// Ensure the .auth directory exists
-		const authDir = path.dirname( storageStatePath );
-		if ( ! fs.existsSync( authDir ) ) {
-			fs.mkdirSync( authDir, { recursive: true } );
-		}
+	await requestContext.dispose();
 
-		// Save authenticated state
-		await page.context().storageState( { path: storageStatePath } );
-
-		console.log( 'WordPress authentication successful!' );
-	} catch ( error ) {
-		console.error( 'Authentication failed:', error );
-		throw error;
-	} finally {
-		await browser.close();
-	}
+	console.log( 'WordPress authentication successful!' );
 }
 
 module.exports = globalSetup;
