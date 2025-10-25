@@ -121,30 +121,39 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          path: mastodon-feed
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: mastodon-feed/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+        working-directory: mastodon-feed
 
       - name: Build assets
         run: npm run build
+        working-directory: mastodon-feed
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+        working-directory: mastodon-feed
 
       - name: Start wp-env
         run: npx wp-env start
+        working-directory: mastodon-feed
 
       - name: Activate plugin
         run: npx wp-env run cli wp plugin activate mastodon-feed
+        working-directory: mastodon-feed
 
       - name: Run E2E tests
         run: npm run test:e2e
+        working-directory: mastodon-feed
         env:
           WPENV_STARTED: true
 
@@ -153,5 +162,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-results
-          path: test-results/
+          path: mastodon-feed/test-results/
           retention-days: 7
