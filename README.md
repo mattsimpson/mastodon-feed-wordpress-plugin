@@ -160,7 +160,7 @@ If you are familiar with GitHub you can clone the repository right into your Wor
 
 1. SSH into your webserver
 2. `cd /path/to/wordpress/wp-content/plugins`
-3. `git clone https://github.com/mattsimpson/mastodon-feed-wordpress-plugin.git mastodon-feed`
+3. `git clone https://github.com/mattsimpson/mastodon-feed.git`
 4. Enable plugin in WordPress admin
 5. Configure settings and use the block editor or shortcode
 

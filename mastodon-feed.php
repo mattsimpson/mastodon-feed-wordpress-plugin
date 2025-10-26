@@ -1,7 +1,7 @@
 <?php
 /*
 	Plugin Name: Mastodon Feed
-	Plugin URI: https://github.com/mattsimpson/mastodon-feed-wordpress-plugin
+	Plugin URI: https://github.com/mattsimpson/mastodon-feed
 	Description: Using the [mastodon-feed] shortcode, this plugin will display specified Mastodon account feeds on your WordPress website.
 	Version: 1.0.0
 	Author: Matt Simpson

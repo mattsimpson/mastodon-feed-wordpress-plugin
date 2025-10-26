@@ -57,7 +57,7 @@ For tag feeds:
 * `onlyPinned` - Show only pinned posts (default: false)
 * `onlyMedia` - Show only posts with media (default: false)
 
-See the [GitHub repository](https://github.com/mattsimpson/mastodon-feed-wordpress-plugin) for full documentation.
+See the [GitHub repository](https://github.com/mattsimpson/mastodon-feed) for full documentation.
 
 == Installation ==
 

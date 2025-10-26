@@ -24,7 +24,7 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: mastodon-feed.php
-msgid "https://github.com/mattsimpson/mastodon-feed-wordpress-plugin"
+msgid "https://github.com/mattsimpson/mastodon-feed"
 msgstr ""
 
 #. Description of the plugin
