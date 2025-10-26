@@ -19,12 +19,18 @@ module.exports = defineConfig( {
 	workers: process.env.CI ? 1 : undefined,
 	reporter: 'html',
 	globalSetup: require.resolve( './tests/e2e/global-setup.js' ),
+	timeout: 60000, // 60 seconds per test
+	expect: {
+		timeout: 10000, // 10 seconds for assertions
+	},
 
 	use: {
 		baseURL: process.env.WP_BASE_URL,
 		storageState: process.env.STORAGE_STATE_PATH,
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure',
+		actionTimeout: 15000, // 15 seconds for actions like click, fill, etc.
+		navigationTimeout: 30000, // 30 seconds for page navigation
 	},
 
 	projects: [

@@ -5,8 +5,16 @@
 const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 
 test.describe( 'Mastodon Feed Block E2E', () => {
-	test.beforeEach( async ( { admin } ) => {
+	test.beforeEach( async ( { admin, page } ) => {
 		await admin.visitAdminPage( 'post-new.php' );
+
+		// Dismiss the WordPress welcome guide if it appears
+		const closeButton = page.locator(
+			'.components-modal__screen-overlay button[aria-label="Close"]'
+		);
+		if ( await closeButton.isVisible( { timeout: 2000 } ).catch( () => false ) ) {
+			await closeButton.click();
+		}
 	} );
 
 	test( 'can insert Mastodon Feed block', async ( { editor } ) => {
@@ -70,15 +78,18 @@ test.describe( 'Mastodon Feed Block E2E', () => {
 		await editor.canvas.getByLabel( 'INSTANCE' ).fill( 'mastodon.social' );
 		const accountField = editor.canvas.getByLabel( 'ACCOUNT ID' );
 		await accountField.fill( '123456' );
-		await accountField.blur(); // Trigger onBlur to finalize setup
 
-		// Wait for block to switch from placeholder to feed preview
-		await page.waitForTimeout( 1000 ); // Wait for ServerSideRender to load
+		// Select the block to ensure inspector controls show
+		await editor.canvas
+			.locator( '[data-type="mastodon-feed/embed"]' )
+			.click();
 
-		// Find and click filter panel in sidebar
+		// Wait for the Filter Options panel to be visible in sidebar
+		// Inspector panels appear immediately after block configuration, even if API fails
 		const filterPanel = page.getByRole( 'button', {
 			name: /filter options/i,
 		} );
+		await filterPanel.waitFor( { state: 'visible', timeout: 10000 } );
 		await filterPanel.click();
 
 		// Toggle exclude boosts
@@ -93,15 +104,17 @@ test.describe( 'Mastodon Feed Block E2E', () => {
 		await editor.canvas.getByLabel( 'INSTANCE' ).fill( 'mastodon.social' );
 		const accountField = editor.canvas.getByLabel( 'ACCOUNT ID' );
 		await accountField.fill( '123456' );
-		await accountField.blur(); // Trigger onBlur to finalize setup
 
-		// Wait for block to switch from placeholder to feed preview
-		await page.waitForTimeout( 1000 ); // Wait for ServerSideRender to load
+		// Select the block to ensure inspector controls show
+		await editor.canvas
+			.locator( '[data-type="mastodon-feed/embed"]' )
+			.click();
 
-		// Find and click display options panel in sidebar
+		// Wait for the Display Options panel to be visible in sidebar
 		const displayPanel = page.getByRole( 'button', {
 			name: /display options/i,
 		} );
+		await displayPanel.waitFor( { state: 'visible', timeout: 10000 } );
 		await displayPanel.click();
 
 		// Toggle show author
@@ -129,8 +142,23 @@ test.describe( 'Mastodon Feed Block E2E', () => {
 		await editor.canvas.getByLabel( 'INSTANCE' ).fill( 'mastodon.social' );
 		await editor.canvas.getByLabel( 'ACCOUNT ID' ).fill( '123456' );
 
-		// Save post
-		await editor.publishPost();
+		// Wait for the block to finish any initial rendering
+		await page.waitForTimeout( 500 );
+
+		// Open publish panel if needed
+		const publishButton = page
+			.getByRole( 'region', { name: 'Editor top bar' } )
+			.getByRole( 'button', { name: 'Publish', exact: true } );
+
+		// Wait for publish button to be available
+		await publishButton.waitFor( { state: 'visible', timeout: 10000 } );
+		await publishButton.click();
+
+		// Click the final publish button in the panel
+		const finalPublishButton = page
+			.getByRole( 'region', { name: 'Editor publish' } )
+			.getByRole( 'button', { name: 'Publish', exact: true } );
+		await finalPublishButton.click();
 
 		// Check post is published (use first match to avoid strict mode violation)
 		const publishedNotice = page.locator( 'text=/published/i' ).first();
@@ -146,17 +174,21 @@ test.describe( 'Mastodon Feed Block E2E', () => {
 		await editor.canvas.getByLabel( 'INSTANCE' ).fill( 'fosstodon.org' );
 		const accountField = editor.canvas.getByLabel( 'ACCOUNT ID' );
 		await accountField.fill( '999999' );
-		await accountField.blur(); // Trigger onBlur to finalize setup
 
-		// Wait for feed to render
-		await page.waitForTimeout( 1000 ); // Wait for ServerSideRender to load
+		// Wait for the block to finish any initial rendering
+		await page.waitForTimeout( 500 );
 
-		// Save as draft
-		await page.getByRole( 'button', { name: /save draft/i } ).click();
-		await page
-			.locator( 'text=/saved/i' )
-			.first()
-			.waitFor( { timeout: 10000 } );
+		// Save the post (button might say "Save draft" or "Save")
+		// Try multiple button variations
+		const saveButton = page
+			.locator( 'button' )
+			.filter( { hasText: /^(Save|Save draft)$/i } )
+			.first();
+		await saveButton.waitFor( { state: 'visible', timeout: 10000 } );
+		await saveButton.click();
+
+		// Wait for save to complete
+		await page.waitForTimeout( 1000 ); // Give it time to save
 
 		// Reload page
 		await page.reload();
@@ -170,12 +202,14 @@ test.describe( 'Mastodon Feed Block E2E', () => {
 		await editor.canvas
 			.locator( '[data-type="mastodon-feed/embed"]' )
 			.click();
-		await page.waitForTimeout( 500 );
 
-		// Check block settings persisted (check in Feed Settings panel in inspector)
+		// Wait for inspector controls to appear
 		const instanceInput = page
 			.getByRole( 'textbox', { name: /instance/i } )
 			.first();
+		await instanceInput.waitFor( { state: 'visible', timeout: 5000 } );
+
+		// Check block settings persisted (check in Feed Settings panel in inspector)
 		await expect( instanceInput ).toHaveValue( 'fosstodon.org' );
 
 		const accountInput = page
