@@ -147,8 +147,16 @@ jobs:
         run: npx wp-env start
         working-directory: mastodon-feed
 
-      - name: Activate plugin
-        run: npx wp-env run cli wp plugin activate mastodon-feed
+      - name: Debug plugin files
+        run: |
+          echo "=== Plugin list ==="
+          npx wp-env run cli wp plugin list
+          echo "=== Plugin directory contents ==="
+          npx wp-env run cli ls -la /var/www/html/wp-content/plugins/mastodon-feed/
+          echo "=== Build directory contents ==="
+          npx wp-env run cli ls -la /var/www/html/wp-content/plugins/mastodon-feed/build/block/
+          echo "=== Check if index.js exists and is readable ==="
+          npx wp-env run cli cat /var/www/html/wp-content/plugins/mastodon-feed/build/block/index.js | head -5
         working-directory: mastodon-feed
 
       - name: Run E2E tests
