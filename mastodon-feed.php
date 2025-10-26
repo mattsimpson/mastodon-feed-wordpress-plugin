@@ -1794,6 +1794,44 @@ add_action(
 add_action( 'admin_init', __NAMESPACE__ . '\mastodon_feed_register_settings' );
 
 /**
+ * Add target attribute to all links in HTML content.
+ *
+ * Parses HTML content and adds the specified target attribute to all anchor tags.
+ *
+ * @param string $content HTML content with potential links.
+ * @param string $target Target attribute value (e.g., '_blank', '_self').
+ *
+ * @return string HTML content with target attributes added to links.
+ */
+function add_target_to_links( $content, $target ) {
+	if ( empty( $content ) || empty( $target ) ) {
+		return $content;
+	}
+
+	// Use DOMDocument to parse and modify HTML safely.
+	$dom = new \DOMDocument();
+
+	// Suppress errors for malformed HTML and load with UTF-8 encoding.
+	libxml_use_internal_errors( true );
+	$dom->loadHTML( '<?xml encoding="UTF-8">' . $content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+	libxml_clear_errors();
+
+	// Find all anchor tags.
+	$links = $dom->getElementsByTagName( 'a' );
+	foreach ( $links as $link ) {
+		// Only add target to links that have an href (skip internal anchors like href="#").
+		$href = $link->getAttribute( 'href' );
+		if ( ! empty( $href ) && '#' !== $href ) {
+			$link->setAttribute( 'target', esc_attr( $target ) );
+		}
+	}
+
+	// Return the modified HTML, removing the XML encoding declaration.
+	$output = $dom->saveHTML();
+	return str_replace( '<?xml encoding="UTF-8">', '', $output );
+}
+
+/**
  * Display Mastodon feed via shortcode.
  *
  * Main shortcode handler that fetches and renders Mastodon posts with customizable
@@ -1872,7 +1910,7 @@ function display_feed( $atts ) {
 					<?php if ( ! empty( $atts['showpostauthor'] ) ) : ?>
 						<img class="avatar" src="<?php echo esc_url( $status['account']['avatar_static'] ); ?>"
 							alt="<?php echo esc_attr( $status['account']['display_name'] ); ?>">
-						<a href="<?php echo esc_url( $status['account']['url'] ); ?>">
+						<a href="<?php echo esc_url( $status['account']['url'] ); ?>" target="<?php echo esc_attr( $atts['linktarget'] ); ?>">
 							<?php echo esc_html( $status['account']['display_name'] ); ?>
 						</a>
 					<?php endif; ?>
@@ -1882,7 +1920,7 @@ function display_feed( $atts ) {
 							<?php if ( ! empty( $atts['showpostauthor'] ) ) : ?>
 								<?php echo esc_html( $atts['text-predatetime'] ); ?>
 							<?php endif; ?>
-							<a href="<?php echo esc_url( $status['url'] ); ?>">
+							<a href="<?php echo esc_url( $status['url'] ); ?>" target="<?php echo esc_attr( $atts['linktarget'] ); ?>">
 								<?php echo esc_html( wp_date( $atts['datetimeformat'], strtotime( $status['created_at'] ) ) ); ?>
 							</a>
 							<?php echo esc_html( $atts['text-postdatetime'] ); ?>
@@ -1900,7 +1938,7 @@ function display_feed( $atts ) {
 				<div class="content-wrapper<?php echo $is_reblog ? ' boosted' : ''; ?>">
 					<?php if ( $is_reblog ) : ?>
 						<div class="account">
-							<a href="<?php echo esc_url( $show_status['account']['url'] ); ?>">
+							<a href="<?php echo esc_url( $show_status['account']['url'] ); ?>" target="<?php echo esc_attr( $atts['linktarget'] ); ?>">
 								<img class="avatar"
 									src="<?php echo esc_url( $show_status['account']['avatar_static'] ); ?>"
 									alt="<?php echo esc_attr( $show_status['account']['display_name'] ); ?>">
@@ -1908,7 +1946,7 @@ function display_feed( $atts ) {
 							</a>
 							<span class="permalink">
 								<?php echo esc_html( $atts['text-predatetime'] ); ?>
-								<a href="<?php echo esc_url( $show_status['url'] ); ?>">
+								<a href="<?php echo esc_url( $show_status['url'] ); ?>" target="<?php echo esc_attr( $atts['linktarget'] ); ?>">
 									<?php echo esc_html( wp_date( $atts['datetimeformat'], strtotime( $show_status['created_at'] ) ) ); ?>
 								</a>
 								<?php echo esc_html( $atts['text-postdatetime'] ); ?>
@@ -1945,6 +1983,8 @@ function display_feed( $atts ) {
 									$render_content = str_replace( ':' . $emoji['shortcode'] . ':', '<img src="' . esc_url( $emoji['url'] ) . '" alt="' . esc_attr( $emoji['shortcode'] ) . '" class="emoji">', $render_content );
 								}
 							}
+							// Add target attribute to all links in the content.
+							$render_content = add_target_to_links( $render_content, $atts['linktarget'] );
 							echo wp_kses_post( $render_content );
 							?>
 
@@ -1956,6 +1996,7 @@ function display_feed( $atts ) {
 										?>
 										<div class="<?php echo esc_attr( $media['type'] ); ?>">
 											<a href="<?php echo esc_url( $media['url'] ); ?>"
+												target="<?php echo esc_attr( $atts['linktarget'] ); ?>"
 												aria-label="
 												<?php
 												echo esc_attr(
@@ -1977,7 +2018,7 @@ function display_feed( $atts ) {
 
 							<?php if ( ! empty( $atts['showpreviewcards'] ) && ! empty( $show_status['card'] ) ) : ?>
 								<div class="card">
-									<a href="<?php echo esc_url( $show_status['card']['url'] ); ?>">
+									<a href="<?php echo esc_url( $show_status['card']['url'] ); ?>" target="<?php echo esc_attr( $atts['linktarget'] ); ?>">
 										<div class="image">
 											<img src="<?php echo esc_url( $show_status['card']['image'] ); ?>"
 												alt="<?php echo esc_attr( $show_status['card']['title'] ); ?>">
