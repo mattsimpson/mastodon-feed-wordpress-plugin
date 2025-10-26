@@ -12,7 +12,11 @@ test.describe( 'Mastodon Feed Block E2E', () => {
 		const closeButton = page.locator(
 			'.components-modal__screen-overlay button[aria-label="Close"]'
 		);
-		if ( await closeButton.isVisible( { timeout: 2000 } ).catch( () => false ) ) {
+		if (
+			await closeButton
+				.isVisible( { timeout: 2000 } )
+				.catch( () => false )
+		) {
 			await closeButton.click();
 		}
 	} );
